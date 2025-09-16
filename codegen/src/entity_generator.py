@@ -32,7 +32,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from {{ output_dir -}}.base_entity import Base
 
 
-class {{ table.name.capitalize() }}Entity(Base):
+class {{ table.name.split('_') | map('capitalize') | join('') }}Entity(Base):
     __tablename__ = "{{ table.name }}"
 {% for column in table.columns %}
     {{ column.name }}: Mapped[{{ column.data_type.to_python_type().__qualname__ -}}

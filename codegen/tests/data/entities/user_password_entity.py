@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from tests.data.entities.base_entity import Base
 
 
-class User_passwordEntity(Base):
+class UserPasswordEntity(Base):
     __tablename__ = "user_password"
 
     id: Mapped[str] = mapped_column(
