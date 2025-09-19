@@ -18,7 +18,13 @@ class CodeGenerator:
     _imports: list[ast.Import | ast.ImportFrom]
     _classes: list[ast.ClassDef]
 
-    def __init__(self, openapi_file_path: str, output_dir: str, parameters: list[str]):
+    def __init__(
+        self,
+        openapi_file_path: str,
+        output_dir: str,
+        parameters: list[str],
+        include_models_dir: str | None = None,
+    ):
         """
         notes:
             * parametersは、datemodel-code-generatorに準拠
@@ -28,7 +34,7 @@ class CodeGenerator:
         self.output_dir = output_dir
         temporary_model_filepath = os.path.join(output_dir, TEMPORARY_MODEL_FILE_NAME)
         temporary_api_filepath = os.path.join(output_dir, TEMPORARY_API_FILE_NAME)
-        self._generate_merged_openapi_file(openapi_file_path)
+        self._generate_merged_openapi_file(openapi_file_path, include_models_dir)
         self._generate_temporary_model_file(temporary_model_filepath, parameters)
         source_code = self._import_temporary_file(temporary_model_filepath)
         self._imports = self._extract_imports(source_code)
@@ -143,7 +149,9 @@ class CodeGenerator:
                 refs.update(CodeGenerator._find_refs(item))
         return refs
 
-    def _generate_merged_openapi_file(self, openapi_filepath: str):
+    def _generate_merged_openapi_file(
+        self, openapi_filepath: str, include_models_dir: str | None
+    ):
         """
         $refを用いて、別ファイルを参照しているopenapiファイルを、1つのファイルに統合する
         """
@@ -169,15 +177,24 @@ class CodeGenerator:
         with open(openapi_filepath, "r", encoding="utf-8") as f:
             openapi_spec = yaml.safe_load(f)
 
-        # $refを抽出
+        # $refのパスを抽出
         refs = self._find_refs(openapi_spec)
+        model_files = set(Path(os.path.dirname(openapi_filepath), ref) for ref in refs)
+
+        if include_models_dir:
+            # include_models_dir内のファイルパスを取得
+            include_model_files = set(
+                f for f in Path(include_models_dir).rglob("*") if f.is_file()
+            )
+
+            # $refファイルとモデルファイルを統合
+            model_files |= include_model_files
 
         # 抽出した$refが指すファイルからschemaを移動し、$refの値も合わせて変更
         components_schemas = {}
-        for ref in refs:
-            ref_file = Path(os.path.dirname(openapi_filepath), ref)
-            schema_name = ref_file.stem
-            with open(ref_file, "r", encoding="utf-8") as rf:
+        for model_file in model_files:
+            schema_name = model_file.stem
+            with open(model_file, "r", encoding="utf-8") as rf:
                 ref_spec = yaml.safe_load(rf)
             ref_spec = convert_ref_to_stem(ref_spec)
             components_schemas.update({schema_name: ref_spec})
