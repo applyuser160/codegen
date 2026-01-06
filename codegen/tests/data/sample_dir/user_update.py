@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-
 from tests.data.sample_dir.user import User
 
 
