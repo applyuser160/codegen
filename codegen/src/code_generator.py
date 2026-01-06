@@ -2,6 +2,7 @@ import ast
 import os
 import re
 import subprocess  # nosec B404
+import sys
 from copy import copy
 from pathlib import Path
 from typing import List
@@ -237,7 +238,9 @@ class CodeGenerator:
         temporary_file_path = Path(temporary_model_filepath).resolve()
         subprocess.run(
             [
-                "datamodel-codegen",
+                sys.executable,
+                "-m",
+                "datamodel_code_generator",
                 "--input",
                 str(openapi_file_path),
                 "--input-file-type",
