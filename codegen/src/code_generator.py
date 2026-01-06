@@ -105,7 +105,7 @@ class CodeGenerator:
                 if module[-1] != ".":
                     module = module + "."
                 class_import_source_codes = [
-                    f"from {module}{str(class_import).lower()} import {class_import}"
+                    f"from {module}{self._convert_to_snake_case(str(class_import))} import {class_import}"
                     for class_import in class_imports
                 ]
                 import_source_codes.extend(class_import_source_codes)
