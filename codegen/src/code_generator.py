@@ -81,16 +81,15 @@ class CodeGenerator:
                 if isinstance(attr, ast.AnnAssign)
             ]
             for annotation in class_annotations:
-                if isinstance(annotation, ast.Name) and annotation.id in class_names:
-                    class_imports.add(annotation.id)
-
-                if isinstance(annotation, ast.BinOp):
-                    left = annotation.left
-                    right = annotation.right
-
-                    if isinstance(left, ast.Name) and isinstance(right, ast.Constant):
-                        if left.id in class_names:
-                            class_imports.add(left.id)
+                for node in ast.walk(annotation):
+                    if isinstance(node, ast.Name) and node.id in class_names:
+                        class_imports.add(node.id)
+                    elif (
+                        isinstance(node, ast.Constant)
+                        and isinstance(node.value, str)
+                        and node.value in class_names
+                    ):
+                        class_imports.add(node.value)
 
             # インポートのソースコード生成
             used_imports: set[str] = self._get_imports_for_class(class_node)

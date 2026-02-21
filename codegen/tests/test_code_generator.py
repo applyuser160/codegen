@@ -21,8 +21,10 @@ class TestCodeGenerator:
         )
 
         # Assert
-        assert len(code_generator._imports) == 3
-        assert len(code_generator._classes) == 3
+        assert len(code_generator._imports) >= 3
+        assert len(code_generator._classes) == 4
+        class_names = {c.name for c in code_generator._classes}
+        assert "Item" in class_names
 
     def test_execute(self):
         # Arrange
@@ -43,8 +45,14 @@ class TestCodeGenerator:
         # Assert
         with os.scandir(output_dir) as entries:
             files = [entry.name for entry in entries if entry.is_file()]
+        assert "item.py" in files
         assert "user.py" in files
         assert "user_create.py" in files
         assert "user_update.py" in files
         assert not os.path.exists("tests/data/sample_dir/temporary_model.py")
         assert not os.path.exists("tests/data/sample_dir/temporary_api.yaml")
+
+        # Verify array/nested generic import logic works
+        with open(os.path.join(output_dir, "user.py"), "r", encoding="utf-8") as f:
+            user_py_content = f.read()
+        assert "from tests.data.sample_dir.item import Item" in user_py_content

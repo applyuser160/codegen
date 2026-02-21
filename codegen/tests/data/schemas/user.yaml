@@ -21,3 +21,7 @@ properties:
     type: string
     format: date-time
     example: '2024-01-02T12:00:00Z'
+  items:
+    type: array
+    items:
+      $ref: './item.yaml'
