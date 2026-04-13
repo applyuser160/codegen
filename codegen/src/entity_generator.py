@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from jinja2 import Template
-from sqlalchemy import Boolean, Date, DateTime, Float, Integer, JSON, String, Time
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, Integer, String, Time
 from sqlglot import Expression, parse
 from sqlglot.expressions import ColumnDef
 
