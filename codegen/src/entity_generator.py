@@ -4,9 +4,10 @@ import os
 from datetime import date, datetime, time
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Template
-from sqlalchemy import Boolean, Date, DateTime, Float, Integer, String, Time
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, Integer, String, Time
 from sqlglot import Expression, parse
 from sqlglot.expressions import ColumnDef
 
@@ -63,6 +64,7 @@ class DataType(Enum):
     DATE = "date"
     DATETIME = "datetime"
     TIME = "time"
+    JSON = "json"
 
     def __eq__(self, other):
         if isinstance(other, DataType):
@@ -92,6 +94,8 @@ class DataType(Enum):
             return DataType.DATETIME
         elif type_str in ["TIME"]:
             return DataType.TIME
+        elif type_str in ["JSON", "JSONB"]:
+            return DataType.JSON
         else:
             raise ValueError(f"Unsupported data type: {type_str}")
 
@@ -113,6 +117,8 @@ class DataType(Enum):
             return DateTime
         elif self is DataType.TIME:
             return Time
+        elif self is DataType.JSON:
+            return JSON
         else:
             raise ValueError(f"Unsupported data type: {self}")
 
@@ -134,6 +140,8 @@ class DataType(Enum):
             return datetime
         elif self is DataType.TIME:
             return time
+        elif self is DataType.JSON:
+            return dict
         else:
             raise ValueError(f"Unsupported data type: {self}")
 
